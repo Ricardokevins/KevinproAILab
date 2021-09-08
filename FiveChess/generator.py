@@ -33,86 +33,126 @@ def print_text(screen, font, x, y, text, fcolor=(255, 255, 255)):
     screen.blit(imgText, (x, y))
 
 
+# import numpy as np
+# numpy_array = np.array([1,2,3])
+# np.save('log.npy',numpy_array )
+
+
+
 def main():
     pygame.init()
+
+    import numpy as np
+    boards = []
+    b = np.load("./data/board.npy")
+    print(b.shape)
+    boards = b.tolist()
+    print(len(boards))
+    
+    
+
+
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption('五子棋')
 
     font1 = pygame.font.SysFont('SimHei', 16)
     font2 = pygame.font.SysFont('SimHei', 36)
     fwidth, fheight = font2.size('黑方获胜')
-    black_win_count = 0
-    white_win_count = 0
+    test_score = []
+    f = open("score.txt",'w')
+    for cur_board in boards:
+        # _checkerboard = [[0] * Line_Points for _ in range(Line_Points)]
+        # _checkerboard[10][10]=BLACK_CHESSMAN.Value
+        # _checkerboard[10][11]=BLACK_CHESSMAN.Value
+        # _checkerboard[10][12]=BLACK_CHESSMAN.Value
+        # _checkerboard[10][13]=BLACK_CHESSMAN.Value
+        # _checkerboard[11][11]=BLACK_CHESSMAN.Value
+        # cur_board = _checkerboard
 
-    checkerboard = Checkerboard(Line_Points)
-    computer1 = randomAI(Line_Points, BLACK_CHESSMAN)
-    computer2 = randomAI(Line_Points, WHITE_CHESSMAN)
+        black_win_count = 0
+        white_win_count = 0
 
+        checkerboard = Checkerboard(Line_Points)
+        computer1 = randomAI(Line_Points, BLACK_CHESSMAN)
+        computer2 = randomAI(Line_Points, WHITE_CHESSMAN)
+        import copy
+        checkerboard._checkerboard = copy.deepcopy(cur_board)
+        computer1._checkerboard = copy.deepcopy(cur_board)
+        computer2._checkerboard = copy.deepcopy(cur_board)
 
-    cur_runner = BLACK_CHESSMAN
-    winner = None
-    AI_point1 = Point(15, 15)
-    checkerboard.drop(cur_runner, AI_point1)
-    computer1.get_drop(AI_point1)
-    cur_runner = _get_next(cur_runner)
+        cur_runner = BLACK_CHESSMAN
+        winner = None
+        AI_point1 = None
+        cur_runner = _get_next(cur_runner)
+ 
 
-    
-    
-
-    
-
-    import time
-    while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                sys.exit()
         
-        computer2.get_opponent_drop(AI_point1)
-        AI_point1 = computer2.AI_drop()
-        winner = checkerboard.drop(cur_runner, AI_point1)
- 
-
-        if winner is None:
-            cur_runner = _get_next(cur_runner)
-            computer1.get_opponent_drop(AI_point1)
-            AI_point1 = computer1.AI_drop()
+        step = 0
+        step_sum = 0
+        game_sum = 0
+        
+        import time
+        
+        while True:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    sys.exit()
+            
+            computer2.get_opponent_drop(AI_point1)
+            AI_point1 = computer2.AI_drop()
             winner = checkerboard.drop(cur_runner, AI_point1)
+            #time.sleep(1)
 
-            if winner is not None:
-                black_win_count += 1
-            cur_runner = _get_next(cur_runner)
-        else:
-            white_win_count += 1
-        #time.sleep(0.1)
- 
+            if winner is None:
+                cur_runner = _get_next(cur_runner)
+                computer1.get_opponent_drop(AI_point1)
+                AI_point1 = computer1.AI_drop()
+                winner = checkerboard.drop(cur_runner, AI_point1)
 
-        # 画棋盘
-        _draw_checkerboard(screen)
+                if winner is not None:
+                    black_win_count += 1
+                cur_runner = _get_next(cur_runner)
+            else:
+                white_win_count += 1
+            
+            
 
-        # 画棋盘上已有的棋子
-        for i, row in enumerate(checkerboard.checkerboard):
-            for j, cell in enumerate(row):
-                if cell == BLACK_CHESSMAN.Value:
-                    _draw_chessman(screen, Point(j, i), BLACK_CHESSMAN.Color)
-                elif cell == WHITE_CHESSMAN.Value:
-                    _draw_chessman(screen, Point(j, i), WHITE_CHESSMAN.Color)
 
-        _draw_left_info(screen, font1, cur_runner, black_win_count, white_win_count)
+            step += 1
 
-        if winner:
-            print_text(screen, font2, (SCREEN_WIDTH - fwidth)//2, (SCREEN_HEIGHT - fheight)//2, winner.Name + '获胜', RED_COLOR)
-            computer1.reset()
-            computer2.reset()
-            checkerboard.reset()
-            cur_runner = BLACK_CHESSMAN
-            winner = None
-            AI_point1 = Point(15, 15)
-            checkerboard.drop(cur_runner, AI_point1)
-            computer1.get_drop(AI_point1)
-            cur_runner = _get_next(cur_runner)
+            # 画棋盘
+            _draw_checkerboard(screen)
 
-        #time.sleep(1)
-        pygame.display.flip()
+            # 画棋盘上已有的棋子
+            for i, row in enumerate(checkerboard.checkerboard):
+                for j, cell in enumerate(row):
+                    if cell == BLACK_CHESSMAN.Value:
+                        _draw_chessman(screen, Point(j, i), BLACK_CHESSMAN.Color)
+                    elif cell == WHITE_CHESSMAN.Value:
+                        _draw_chessman(screen, Point(j, i), WHITE_CHESSMAN.Color)
+
+            _draw_left_info(screen, font1, cur_runner, black_win_count, white_win_count)
+
+            if winner:
+                print_text(screen, font2, (SCREEN_WIDTH - fwidth)//2, (SCREEN_HEIGHT - fheight)//2, winner.Name + '获胜', RED_COLOR)
+                checkerboard._checkerboard = copy.deepcopy(cur_board)
+                computer1._checkerboard = copy.deepcopy(cur_board)
+                computer2._checkerboard = copy.deepcopy(cur_board)
+                cur_runner = BLACK_CHESSMAN
+                winner = None
+                cur_runner = _get_next(cur_runner)
+                game_sum+=1
+                if game_sum == 100:
+                    test_score.append(black_win_count/game_sum)
+                    print(black_win_count,game_sum)
+                    f.write(str(black_win_count/game_sum)+"\n")
+                    f.flush()
+                    break
+                    
+
+
+            #time.sleep(1)
+            pygame.display.flip()
 
 
 def _get_next(cur_runner):
@@ -195,60 +235,6 @@ def _get_clickpoint(click_pos):
 
     return Point(x, y)
 
-class randomAI:
-    def __init__(self, line_points, chessman):
-        self._line_points = line_points
-        self._my = chessman
-        self._opponent = BLACK_CHESSMAN if chessman == WHITE_CHESSMAN else WHITE_CHESSMAN
-        self._checkerboard = [[0] * line_points for _ in range(line_points)]
-    def reset(self):
-        self._checkerboard = [[0] * self._line_points for _ in range(self._line_points)]
-    
-    def get_drop(self, point):
-        self._checkerboard[point.Y][point.X] = self._my.Value
-
-    def get_opponent_drop(self, point):
-        self._checkerboard[point.Y][point.X] = self._opponent.Value
-
-    def check_near_direction(self, point, x_offset, y_offset):
-        x = point.X
-        y = point.Y
-        for step in range(2):
-            x = point.X + step * x_offset
-            y = point.Y + step * y_offset
-            if 0 <= x < self._line_points and 0 <= y < self._line_points:
-                if self._checkerboard[y][x]!=0:
-                    return True
-        return False
-
-    def checkAndSkip(self,point):
-        for os in offset:
-            if self.check_near_direction(point, os[0], os[1]) == True:
-                return True
-        return False
-
-    def AI_drop(self):
-        point = None
-        temp_point = None
-        score = 0
-        maybe_point = []
-        count = 0 
-        for i in range(self._line_points):
-            for j in range(self._line_points):
-                if self._checkerboard[j][i] == 0:
-                    count +=1
-                    cur_point = Point(i,j)
-                    if self.checkAndSkip(cur_point):
-                        maybe_point.append(cur_point)
-        if len(maybe_point)==0:
-            print(count)
-            for i in range(self._line_points):
-                for j in range(self._line_points):
-                    print(self._checkerboard[j][i],end="")
-                print('\n')
-        point = random.choice(maybe_point)    
-        self._checkerboard[point.Y][point.X] = self._my.Value
-        return point
 
 class AI:
     def __init__(self, line_points, chessman):
@@ -263,6 +249,8 @@ class AI:
         self._checkerboard[point.Y][point.X] = self._my.Value
 
     def get_opponent_drop(self, point):
+        if point==None:
+            return 
         self._checkerboard[point.Y][point.X] = self._opponent.Value
 
     def AI_drop(self):

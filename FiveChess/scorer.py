@@ -33,8 +33,15 @@ def print_text(screen, font, x, y, text, fcolor=(255, 255, 255)):
     screen.blit(imgText, (x, y))
 
 
+# import numpy as np
+# numpy_array = np.array([1,2,3])
+# np.save('log.npy',numpy_array )
+
+
 def main():
     pygame.init()
+
+    boards = []
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption('五子棋')
 
@@ -58,7 +65,9 @@ def main():
 
     
     
-
+    step = 0
+    step_sum = 0
+    game_sum = 0
     
 
     import time
@@ -84,7 +93,8 @@ def main():
         else:
             white_win_count += 1
         #time.sleep(0.1)
- 
+
+        step += 1
 
         # 画棋盘
         _draw_checkerboard(screen)
@@ -110,6 +120,21 @@ def main():
             checkerboard.drop(cur_runner, AI_point1)
             computer1.get_drop(AI_point1)
             cur_runner = _get_next(cur_runner)
+            step_sum += step
+            game_sum += 1
+            step = 0
+            #print(step_sum/game_sum)
+        else:
+            
+            prob = random.randint(0, 100)
+            if prob <= 10:
+                boards.append(checkerboard.checkerboard)
+                print(len(boards))
+        if len(boards) == 1000:
+            import numpy as np
+            numpy_array = np.array(boards)
+            np.save('./data/{}_{}.npy'.format(game_sum,step),numpy_array)
+            exit()
 
         #time.sleep(1)
         pygame.display.flip()
