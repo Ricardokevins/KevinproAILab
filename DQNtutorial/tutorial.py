@@ -123,19 +123,19 @@ for i_episode in range(4000):
             loss_list.append(loss_sum.detach().numpy().tolist()/(i_episode+1))
             index.append(i_episode+1)
             
-                
 
         if done:    # 如果回合结束, 进入下回合
             smooth_life = smooth_life * 0.99 + life * 0.01
             #print(round(smooth_life,4))
             break
-        
-        if i_episode > 205:
-            break
-
         life += 1
         s = s_
 
+    print(i_episode)
+    if i_episode > 250:
+        break
+    
 import matplotlib.pyplot as plt
-plt.plot(loss_list, index, label="sigmoid")
+print(loss_list)
+plt.plot(index,loss_list, label="sigmoid")
 plt.show()
