@@ -85,9 +85,16 @@ class DQN(object):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        return loss
 
 dqn = DQN() # 定义 DQN 系统
+
+loss_sum = 0
+loss_list = []
+index = []
+
 smooth_life = 0
+counter = 0
 for i_episode in range(4000):
     life = 0
     #print("Game: {}".format(i_episode))
@@ -109,12 +116,26 @@ for i_episode in range(4000):
         dqn.store_transition(s, a, r, s_)
 
         if dqn.memory_counter > MEMORY_CAPACITY:
-            dqn.learn() # 记忆库满了就进行学习
+            loss = dqn.learn() # 记忆库满了就进行学习
+            loss_sum += loss
+            counter+=1
+            
+            loss_list.append(loss_sum.detach().numpy().tolist()/(i_episode+1))
+            index.append(i_episode+1)
+            
+                
 
         if done:    # 如果回合结束, 进入下回合
             smooth_life = smooth_life * 0.99 + life * 0.01
             #print(round(smooth_life,4))
             break
         
+        if i_episode > 205:
+            break
+
         life += 1
         s = s_
+
+import matplotlib.pyplot as plt
+plt.plot(loss_list, index, label="sigmoid")
+plt.show()
