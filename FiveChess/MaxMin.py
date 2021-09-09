@@ -189,7 +189,8 @@ class MaxMinAI:
 
             global search_count
             search_count += 1
-
+            if search_count > 15000:
+                break #
             # 如果要评估的位置没有相邻的子， 则不去评估  减少计算
             if not self.has_neightnor(next_step):
                 continue
