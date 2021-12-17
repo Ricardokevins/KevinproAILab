@@ -148,6 +148,11 @@ def loss_function(x_hat, x, mu, log_var):
     """
     # 1. the reconstruction loss.
     # We regard the MNIST as binary classification
+    print(x)
+    print(x_hat)
+    print(mu.shape)
+    print(log_var.shape)
+    exit()
     BCE = F.binary_cross_entropy(x_hat, x, reduction='sum')
 
     # 2. KL-divergence
